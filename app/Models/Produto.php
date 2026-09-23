@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Produto extends Model
 {
-    // VULN-03 (mass assignment): nenhum campo protegido, inclusive "aprovado"
-    protected $guarded = [];
+    // VULN-03 corrigida: lista branca; "aprovado" fica de fora do preenchimento em massa
+    protected $fillable = ['nome', 'preco', 'descricao'];
+
+    protected $casts = [
+        'aprovado' => 'boolean',
+    ];
 }

@@ -1,0 +1,29 @@
+# Triagem dos alertas do ZAP (formato: ID<TAB>AÇÃO<TAB>descrição).
+# Cada exceção tem o motivo escrito. Revisar este arquivo sempre que a app mudar.
+#
+# Risco aceito: por design do Laravel, o JS (axios) precisa ler o XSRF-TOKEN pra
+# mandar o token CSRF. O cookie de sessão (laravel-session) tem HttpOnly.
+10010	IGNORE	(Cookie No HttpOnly Flag - XSRF-TOKEN, risco aceito)
+#
+# Falso positivo de contexto: só ocorre em arquivo estático (/robots.txt), que o
+# servidor embutido do PHP entrega sem passar pelo Laravel. Páginas dinâmicas
+# têm os headers (middleware SecurityHeaders), e isso é garantido pelo teste
+# test_respostas_trazem_headers_de_seguranca (controle compensatório).
+# Em produção, headers de estáticos são configurados no servidor web (nginx).
+10021	IGNORE	(X-Content-Type-Options Header Missing - só estáticos)
+90004	IGNORE	(Cross-Origin-Resource-Policy Header Missing - só estáticos)
+#
+# Falso positivo: o corpo do redirect do Laravel contém só a URL de destino.
+10044	IGNORE	(Big Redirect Detected - corpo só com a URL)
+#
+# Informativo: detecta cookies que não alteram a resposta; não é vulnerabilidade.
+90027	IGNORE	(Cookie Slack Detector - informativo)
+#
+# Informativos (INFO = continuam no relatório, mas não falham o pipeline):
+# 10031: o valor de ?q volta no atributo value do input, mas escapado por {{ }};
+#        coberto pelo teste test_busca_nao_reflete_script_sem_escapar.
+10031	INFO	(User Controllable HTML Element Attribute - escapado, coberto por teste)
+# 10049/10112/10104: só descrevem cache, cookies de sessão e variações de User-Agent.
+10049	INFO	(Non-Storable / Storable Content - informativo)
+10112	INFO	(Session Management Response Identified - informativo)
+10104	INFO	(User Agent Fuzzer - informativo)

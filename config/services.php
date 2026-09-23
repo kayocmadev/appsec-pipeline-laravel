@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'frete' => [
+        'key' => env('FRETE_API_KEY'),
+    ],
+
 ];
