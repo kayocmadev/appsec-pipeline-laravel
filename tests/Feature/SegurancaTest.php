@@ -51,4 +51,32 @@ class SegurancaTest extends TestCase
         $response->assertDontSee($payload, false);
         $response->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false);
     }
+
+    // VULN-03
+    public function test_cadastro_ignora_campo_aprovado_enviado_pelo_usuario(): void
+    {
+        $this->post('/produtos', [
+            'nome' => 'Produto do atacante',
+            'preco' => 10,
+            'aprovado' => 1, // campo que não existe no formulário
+        ]);
+
+        $produto = Produto::where('nome', 'Produto do atacante')->first();
+
+        $this->assertNotNull($produto);
+        $this->assertFalse((bool) $produto->aprovado);
+    }
+
+    // achado "Buffer/Integer Overflow" do ZAP: input inválido não pode virar erro 500
+    public function test_cadastro_sem_preco_retorna_erro_de_validacao(): void
+    {
+        $this->post('/produtos', ['nome' => 'Sem preço'])
+            ->assertSessionHasErrors('preco');
+    }
+
+    public function test_cadastro_com_nome_gigante_retorna_erro_de_validacao(): void
+    {
+        $this->post('/produtos', ['nome' => str_repeat('A', 10000), 'preco' => 10])
+            ->assertSessionHasErrors('nome');
+    }
 }

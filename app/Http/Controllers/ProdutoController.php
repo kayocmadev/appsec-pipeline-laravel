@@ -23,8 +23,14 @@ class ProdutoController extends Controller
 
     public function store(Request $request)
     {
-        // VULN-03 (mass assignment): aceita qualquer campo do request
-        Produto::create($request->all());
+        // VULN-03 corrigida: só os campos validados chegam no create()
+        $dados = $request->validate([
+            'nome' => ['required', 'string', 'max:255'],
+            'preco' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
+            'descricao' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        Produto::create($dados);
 
         return redirect()->route('produtos.index');
     }
