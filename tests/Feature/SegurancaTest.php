@@ -79,4 +79,22 @@ class SegurancaTest extends TestCase
         $this->post('/produtos', ['nome' => str_repeat('A', 10000), 'preco' => 10])
             ->assertSessionHasErrors('nome');
     }
+
+    // achados de headers do ZAP (DAST)
+    public function test_respostas_trazem_headers_de_seguranca(): void
+    {
+        $response = $this->get('/produtos');
+
+        $response->assertHeader('X-Frame-Options', 'DENY');
+        $response->assertHeader('X-Content-Type-Options', 'nosniff');
+        $response->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+        $response->assertHeader('Cross-Origin-Opener-Policy', 'same-origin');
+        $response->assertHeader('Cross-Origin-Resource-Policy', 'same-origin');
+        $response->assertHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+        $response->assertHeader('Permissions-Policy');
+        $this->assertStringContainsString(
+            "frame-ancestors 'none'",
+            $response->headers->get('Content-Security-Policy', '')
+        );
+    }
 }
