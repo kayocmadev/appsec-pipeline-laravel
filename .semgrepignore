@@ -1,0 +1,5 @@
+# regras próprias e seus arquivos de teste (vulneráveis de propósito)
+semgrep-rules/
+vendor/
+storage/
+node_modules/

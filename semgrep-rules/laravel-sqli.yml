@@ -1,0 +1,49 @@
+rules:
+  - id: laravel-sqli-raw-query
+    mode: taint
+    languages: [php]
+    severity: ERROR
+    message: >-
+      Dado vindo do request chega na string SQL de uma query crua. Use bindings
+      (DB::select('... = ?', [$valor])) ou o Query Builder/Eloquent.
+    metadata:
+      cwe: "CWE-89: SQL Injection"
+      owasp: "A03:2021 - Injection"
+    pattern-sources:
+      - pattern-either:
+          - patterns:
+              - pattern-either:
+                  - pattern: $REQ->input(...)
+                  - pattern: $REQ->query(...)
+                  - pattern: $REQ->get(...)
+                  - pattern: $REQ->post(...)
+                  - pattern: $REQ->string(...)
+                  - pattern: $REQ->all()
+              # sem isso, qualquer ->get() (ex.: Produto::where(...)->get()) viraria fonte
+              - metavariable-regex:
+                  metavariable: $REQ
+                  regex: ^\$(request|req)$
+          - pattern: request(...)
+          - pattern: request()->$METHOD(...)
+          - pattern: $_GET
+          - pattern: $_POST
+          - pattern: $_REQUEST
+    pattern-sinks:
+      # só o 1º argumento (a string SQL) é sumidouro; bindings no 2º são seguros
+      - patterns:
+          - pattern-either:
+              - pattern: DB::select($SQL, ...)
+              - pattern: DB::selectOne($SQL, ...)
+              - pattern: DB::statement($SQL, ...)
+              - pattern: DB::insert($SQL, ...)
+              - pattern: DB::update($SQL, ...)
+              - pattern: DB::delete($SQL, ...)
+              - pattern: DB::unprepared($SQL)
+              - pattern: DB::raw($SQL)
+              - pattern: $Q->whereRaw($SQL, ...)
+              - pattern: $Q->orWhereRaw($SQL, ...)
+              - pattern: $Q->selectRaw($SQL, ...)
+              - pattern: $Q->orderByRaw($SQL, ...)
+              - pattern: $Q->havingRaw($SQL, ...)
+              - pattern: $M::whereRaw($SQL, ...)
+          - focus-metavariable: $SQL

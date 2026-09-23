@@ -1,0 +1,18 @@
+rules:
+  - id: laravel-blade-unescaped-output
+    languages: [generic]
+    severity: WARNING
+    message: >-
+      {!! !!} imprime HTML sem escapar. Se o conteúdo vier do usuário, é XSS.
+      Use {{ }} (escapa com htmlspecialchars) ou sanitize antes.
+    metadata:
+      cwe: "CWE-79: Cross-site Scripting"
+      owasp: "A03:2021 - Injection"
+    paths:
+      include:
+        - "*.blade.php"
+    patterns:
+      # regex em vez de "{!! ... !!}": o "..." do modo generic atravessa linhas
+      - pattern-regex: '\{!!.*?!!\}'
+      # texto dentro de comentário Blade não é renderizado
+      - pattern-not-inside: "{{-- ... --}}"
