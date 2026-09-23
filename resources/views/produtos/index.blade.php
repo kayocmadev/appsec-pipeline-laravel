@@ -13,8 +13,8 @@
     </form>
 
     @if (request('q'))
-        {{-- VULN-02 (XSS refletido): {!! !!} não escapa o HTML --}}
-        <p>Resultados para: {!! request('q') !!}</p>
+        {{-- VULN-02 corrigida: {{ }} escapa com htmlspecialchars antes de imprimir --}}
+        <p>Resultados para: {{ request('q') }}</p>
     @endif
 
     <ul>

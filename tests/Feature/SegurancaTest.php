@@ -39,4 +39,16 @@ class SegurancaTest extends TestCase
     {
         $this->get("/produtos?q=Disjuntor'")->assertOk();
     }
+
+    // VULN-02
+    public function test_busca_nao_reflete_script_sem_escapar(): void
+    {
+        $payload = '<script>alert(1)</script>';
+
+        $response = $this->get('/produtos?q='.urlencode($payload));
+
+        // false = compara com o HTML bruto, sem o assertSee escapar o texto antes
+        $response->assertDontSee($payload, false);
+        $response->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', false);
+    }
 }
