@@ -18,7 +18,8 @@ $DOCKER semgrep/semgrep semgrep scan \
 
 echo
 echo "==> [3/3] SCA: composer audit (dependências com CVE)"
-$DOCKER -e COMPOSER_HOME=/tmp/composer composer:latest composer audit || falhas+=("SCA (composer audit)")
+# --locked lê o composer.lock, e não o vendor/ (que pode estar desatualizado)
+$DOCKER -e COMPOSER_HOME=/tmp/composer composer:latest composer audit --locked || falhas+=("SCA (composer audit)")
 
 echo
 if [ ${#falhas[@]} -eq 0 ]; then

@@ -11,6 +11,28 @@ permissions:
   contents: read
 
 jobs:
+  tests:
+    name: Testes de regressão (PHPUnit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: pdo_sqlite
+          coverage: none
+
+      - name: Instalar dependências
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          cp .env.example .env
+          php artisan key:generate
+
+      # tests/Feature/SegurancaTest.php repete cada ataque (SQLi, XSS, mass assignment, headers)
+      - name: php artisan test
+        run: php artisan test
+
   sast:
     name: SAST (Semgrep)
     runs-on: ubuntu-latest
