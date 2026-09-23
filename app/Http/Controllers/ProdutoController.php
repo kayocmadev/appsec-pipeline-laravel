@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Http;
 
 class ProdutoController extends Controller
 {
-    // VULN-04 (segredo hardcoded): chave fake, mas no lugar errado
-    private const FRETE_API_KEY = 'frete-demo-9d1c7b2e5a8f4d3c6b1a';
-
     public function index(Request $request)
     {
         $q = $request->input('q', '');
@@ -37,7 +34,7 @@ class ProdutoController extends Controller
 
     public function frete(Request $request)
     {
-        return Http::withToken(self::FRETE_API_KEY)
+        return Http::withToken(config('services.frete.key')) // VULN-04 corrigida: chave vem do .env
             ->get('https://api.exemplo-frete.com/cotacao', ['cep' => $request->input('cep')])
             ->json();
     }
