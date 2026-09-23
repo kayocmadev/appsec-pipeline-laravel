@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Produto;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 
 class ProdutoController extends Controller
@@ -16,8 +15,8 @@ class ProdutoController extends Controller
     {
         $q = $request->input('q', '');
 
-        // VULN-01 (SQL injection): input concatenado direto na query
-        $produtos = DB::select("SELECT * FROM produtos WHERE nome LIKE '%$q%'");
+        // VULN-01 corrigida: o Query Builder envia $q como binding, separado do SQL
+        $produtos = Produto::where('nome', 'like', "%{$q}%")->get();
 
         return view('produtos.index', ['produtos' => $produtos]);
     }
